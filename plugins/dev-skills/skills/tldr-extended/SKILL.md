@@ -10,7 +10,7 @@ English — but with room to actually understand it. They stepped away, or the s
 was long or messy enough that a 150-word version would force them to trust
 conclusions they can't see the reasoning behind. Assume they own the outcome but are
 not reading the code. Make them correctly and completely informed in 2–3 minutes of
-reading.
+reading — and scannable in 15 seconds when they're only triaging.
 
 ## Rules
 
@@ -40,27 +40,46 @@ something.
 ## Output
 
 Target 300–600 words — roughly 2–4x the short version, never more. No preamble, no
-"Here's the extended TLDR". Full sentences and short paragraphs; bullets only where
-they genuinely read faster. Six labeled sections:
+"Here's the extended TLDR".
 
-**Short version** — 2–4 sentences up top. What happened and where things stand, so
-everything after it is elaboration rather than suspense.
+**Design for two reading speeds.** The full read is 2–3 minutes; the skim is 15
+seconds. Headers say what lives where, status glyphs mark state, and bold is the
+highlighter: in every bullet and paragraph, bold the few words that carry the
+conclusion, so reading only the bold text still tells a true, coherent story. Bold
+sparingly — once more than roughly 15% of the text is bold, nothing is highlighted.
+Identifiers the user would act on (file paths, PR numbers, job ids, commands) go in
+`code`. Bullets are the default, each leading with its point; use a short paragraph
+only where the story genuinely flows better.
 
-**What happened** — the story in plain English, 1–3 short paragraphs or up to 6
-bullets. What was being attempted, what was found or built, what changed course and
-why. This is the section the short /tldr doesn't have — spend the words here.
+Render exactly these six sections, in this order, each with a real `##` markdown
+header bearing exactly this name:
 
-**Where things stand** — the honest current state, split cleanly: done and verified /
-done but NOT verified / broken or still open / deliberately skipped. Label which is
-which — "done" without "verified" must be visible as such.
+**Short version** — 2–4 sentences with the key outcomes **bolded**. What happened
+and where things stand, so everything after it is elaboration rather than suspense.
 
-**Why it matters** — 2–4 sentences in terms of money, time, risk, customers, or the
-launch. Not technical elegance. If nothing here matters at that level, say so in one
-line.
+**What happened** — the story, grouped by topic, never by timestamp. When there are
+two or more distinct threads, give each its own `###` sub-header — a plain-English
+mini-headline ("The staging check", "The cleanup that fought back") — so the reader
+can skip a whole thread at a glance. Under each: 2–5 bullets covering what was
+attempted, what was found or built, and what changed course and why. This is the
+section the short /tldr doesn't have — spend the words here.
 
-**Needs you** — only if something is genuinely blocked on the user's decision. One
-line per decision, with the tradeoff in plain terms. Omit the section entirely
-otherwise.
+**Where things stand** — one bullet per item, grouped under these glyphs, in this
+order, empty groups omitted:
+- ✅ **Done and verified**
+- 🟡 **Done but NOT verified** — name what would verify it
+- ❌ **Broken or still open**
+- ⏭️ **Deliberately skipped** — and why
+
+"Done" without "verified" is always 🟡, never ✅.
+
+**Why it matters** — 2–4 sentences or bullets in terms of money, time, risk,
+customers, or the launch. Not technical elegance. If nothing rises to that level,
+say so in one line.
+
+**⚠️ Needs you** — only if something is genuinely blocked on the user's decision.
+One bullet per decision: **the choice in bold**, then the tradeoff in plain terms.
+Omit the section entirely — header included — otherwise.
 
 **Recommend** — exactly one sentence, picking one of:
 - *Stop and close this out* — done, verified, nothing pending.
