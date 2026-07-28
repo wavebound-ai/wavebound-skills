@@ -1,0 +1,21 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "wavebound-skills",
+  "description": "Wavebound's company skill library for Claude Code — role-based skill bundles (developers, legal, marketing, ...) installable as plugins.",
+  "owner": {
+    "name": "Wavebound",
+    "email": "contact@paulhers.com"
+  },
+  "plugins": [
+    {
+      "name": "dev-skills",
+      "description": "Developer skills: /tldr and /tldr-extended — collapse a long or technical Claude Code session into a plain-English summary with one committed recommendation. /tldr is the 30-second version; /tldr-extended is the 2-3 minute full picture.",
+      "author": {
+        "name": "Wavebound"
+      },
+      "category": "development",
+      "source": "./plugins/dev-skills",
+      "homepage": "https://github.com/wavebound-ai/wavebound-skills/tree/main/plugins/dev-skills"
+    }
+  ]
+}
