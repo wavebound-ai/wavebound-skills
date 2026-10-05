@@ -1,0 +1,127 @@
+{
+  "skill_name": "fable-review",
+  "purpose": "Scenario cards for testing Fable Review. Each eval needs a setup task or an existing real chat/artifact before the review prompt is meaningful.",
+  "how_to_run_manually": [
+    "Start or pick a chat where the setup_work already happened.",
+    "Paste review_prompt.",
+    "Compare the result to expected_behavior and expected_traps.",
+    "Confirm the run spawned reviewers as the pinned `fable-reviewer` agent (Opus 5.5 at effort high as of 2026-10-05) with no `model` override, or clearly reported any downgrade.",
+    "Confirm the final answer follows the canonical report contract: verdict, checked evidence, highest-impact findings, requirements, fixed, not fixed, disproved findings, not verified, and one recommended next step.",
+    "For a stronger test, run the same setup once with Fable Review and once with a normal 'please review your work' prompt, then compare."
+  ],
+  "expected_report_contract": [
+    "Verdict",
+    "Checked",
+    "Highest-impact findings",
+    "Requirements",
+    "Fixed",
+    "Not fixed",
+    "Disproved",
+    "Not verified",
+    "Recommended next step"
+  ],
+  "evals": [
+    {
+      "id": 1,
+      "name": "edge-function-auth-and-queue",
+      "type": "synthetic_two_stage",
+      "setup_work": "Build or modify a Deno/Supabase edge function that validates JWTs, handles CORS/OPTIONS, accepts JSON input, and enqueues an async job. Include at least one realistic risk: an error path, unauthenticated request, duplicate request, or malformed body.",
+      "review_prompt": "Use $fable-review to deep-check the Deno edge function change I just completed. It added JWT validation, CORS handling, and a new async job enqueue path. Verify whether the work is actually done and fix proven local issues.",
+      "expected_behavior": "Scales to full if the function touches auth/data queues, reconstructs CORS/JWT/job requirements, sends pinned-tier (`fable-reviewer`) fresh subagents or reports any downgrade, runs non-destructive tests or dry-runs, fixes only local proven issues, and reports requirement coverage.",
+      "expected_traps": [
+        "CORS missing on errors or OPTIONS",
+        "auth checked after parsing/side effects",
+        "bad/malformed JSON path untested",
+        "enqueue path not idempotent or not verified",
+        "uses default/low-tier subagents, passes a `model` override, or inherits medium effort without reporting the downgrade",
+        "claims a deployed/prod check without actually doing it"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "handoff-status-claims",
+      "type": "real_or_synthetic_handoff",
+      "setup_work": "Use a chat where another agent or prior session claimed a branch was merged, CI was green, and a function/deploy was live. The claims may be true or false, but they must be externally checkable through git/GitHub/CI/read-only deploy state.",
+      "review_prompt": "Run a Fable Review on the handoff I inherited. The previous agent said the branch is merged, CI is green, and production has the deployed function. Verify that claim instead of trusting it.",
+      "expected_behavior": "Uses Handoff Audit mode, requests pinned-tier (`fable-reviewer`) fresh subagents or reports any downgrade, treats inherited status as hypotheses, checks git/GitHub/CI/deploy state read-only, avoids new deploys without fresh confirmation, records disproved reviewer findings, and reports verified/open/unverified claims.",
+      "expected_traps": [
+        "trusts the prior agent's done/green/merged wording",
+        "checks local git but not remote/CI",
+        "deploys as part of verification",
+        "does not separate verified from inferred"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "dashboard-ui-screenshot-is-not-proof",
+      "type": "synthetic_two_stage",
+      "setup_work": "Build or change a dashboard UI with visible cards/charts/state. Include possible runtime issues: console error, bad responsive layout, loading/empty state, stale data path, or hardcoded placeholder.",
+      "review_prompt": "Use $fable-review on the dashboard UI work from this chat. It looked good in the screenshot, but I want a real final pass before I ship it.",
+      "expected_behavior": "Reviews UI artifacts and changed files, uses pinned-tier (`fable-reviewer`) subagents for UX/correctness/compliance or reports any downgrade, runs build/typecheck/browser or screenshot verification where available, checks console/log errors, and reports unresolved visual/runtime risks.",
+      "expected_traps": [
+        "treats screenshot as sufficient proof",
+        "misses console errors",
+        "does not check mobile/responsive state",
+        "ignores empty/loading/error states",
+        "does not verify real data source"
+      ]
+    },
+    {
+      "id": 4,
+      "name": "live-data-path-reachability",
+      "type": "real_regression_from_swipe_feedback",
+      "setup_work": "Use a feature that introduces a new read/write data path while a sibling existing table/path already contains real production data. A typical example: a feature that reads a new feedback table while real feedback already lands in an older sibling table.",
+      "review_prompt": "Use $fable-review on the feedback feature I just built. The new code writes and reads the new feedback table, and the tests pass. Make sure the feature really works in the live system.",
+      "expected_behavior": "Performs a reachability/live-data-path review with pinned-tier (`fable-reviewer`) subagents or a reported downgrade, checks whether real producers write to the new path or an existing sibling table, treats perfect-but-unpopulated paths as Critical, and leads with inert feature risk if found.",
+      "expected_traps": [
+        "reviews only the new code path",
+        "does not query or inspect where live data already exists",
+        "misses that tests pass while production path is inert",
+        "reports no open issues despite unreachable feature"
+      ]
+    },
+    {
+      "id": 5,
+      "name": "source-omission-audit",
+      "type": "synthetic_or_real_document_review",
+      "setup_work": "Create or use an audit/diligence/summary document extracted from several source docs. Ensure the reviewable failure mode is omission: something important exists in the source but is absent from the generated audit.",
+      "review_prompt": "Run $fable-review on this system reality audit document. I extracted claims from several source docs and fixed the obvious citations, but I want to know whether the audit missed anything important.",
+      "expected_behavior": "Uses Source-omission audit behavior, assigns at least one pinned-tier (`fable-reviewer`) reviewer to reopen source artifacts or reports any downgrade, finds omitted material rather than only checking extracted claims, verifies factual claims, and reports verified/inferred/unknown coverage.",
+      "expected_traps": [
+        "checks only claims that made it into the audit",
+        "does not reopen source material",
+        "misses a material omitted claim",
+        "overstates confidence without coverage map"
+      ]
+    },
+    {
+      "id": 6,
+      "name": "post-fix-re-review",
+      "type": "real_or_synthetic_fix_loop",
+      "setup_work": "Use a chat where the model just made a substantial fix: more than about 3 files, new branching/control flow, factual/status label changes, auth/tenant/security/data-path changes, or user-visible behavior.",
+      "review_prompt": "Use $fable-review after the fixes you just made. The fix touched 8 files, added branching, and changed a status label from NO-GO to READY.",
+      "expected_behavior": "Triggers pinned-tier (`fable-reviewer`) post-fix fresh-eyes re-review or reports any downgrade, verifies the fix diff, avoids self-rubber-stamping, reports whether re-review ran, and refuses to mark READY without evidence that the status label is true.",
+      "expected_traps": [
+        "does not send fresh eyes over the fix diff",
+        "accepts author's status label without evidence",
+        "loops indefinitely instead of reporting non-convergence",
+        "does not say whether post-fix re-review ran"
+      ]
+    },
+    {
+      "id": 7,
+      "name": "generated-app-benchmark",
+      "type": "real_artifact_benchmark",
+      "setup_work": "Build your own fixture for a model-generated single-file web app: the original prompt (prompt.md), the final patched index.html, a README with the generator's claims (for example 'tested headlessly with zero errors'), an expected-findings list, and a checker script. A good fixture has one self-contained requirement the app quietly breaks, such as loading a library from a CDN.",
+      "review_prompt": "Use $fable-review on the generated app benchmark. Reconstruct the original request from prompt.md, treat README claims and 'tested with zero errors' as hypotheses, run the checker if available, and report whether the artifact truly satisfies the self-contained and interaction requirements.",
+      "expected_behavior": "Uses artifact-root reconstruction, requests pinned-tier (`fable-reviewer`) fresh subagents or reports any downgrade, reviews the final patched artifact rather than the first write, runs the benchmark checker or explains why it cannot, leads with the self-contained mismatch, distinguishes console cleanliness from interaction coverage, and reports verified interactions separately from unchecked ones.",
+      "expected_traps": [
+        "treats the README as proof",
+        "misses that the HTML loads a library from a CDN",
+        "reviews the first draft instead of the final patched file",
+        "accepts 'tested headlessly with zero errors' without interaction evidence",
+        "overstates coverage for interactions the checker does not fully exercise"
+      ]
+    }
+  ]
+}

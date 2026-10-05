@@ -1,6 +1,6 @@
 {
   "name": "dev-skills",
-  "description": "Developer skills: /tldr and /tldr-extended — collapse a long or technical Claude Code session into a plain-English summary with one committed recommendation. /tldr is the 30-second version; /tldr-extended is the 2-3 minute full picture.",
+  "description": "Developer skills: /tldr and /tldr-extended collapse a long or technical Claude Code session into a plain-English summary with one committed recommendation; /fable-review is the fresh-eyes final review before work ships, with reviewers pinned to the bundled fable-reviewer agent (Opus, effort high).",
   "author": {
     "name": "Wavebound"
   }

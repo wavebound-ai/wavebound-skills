@@ -6,7 +6,7 @@ as role-based bundles so everyone installs only what their role needs. Built by
 
 | Bundle | For | Skills |
 | ------ | --- | ------ |
-| `dev-skills` | Developers | `/tldr`, `/tldr-extended` |
+| `dev-skills` | Developers | `/tldr`, `/tldr-extended`, `/fable-review` |
 
 More bundles (legal, marketing, ops, ...) land as teams add them — see
 [CONTRIBUTING.md](CONTRIBUTING.md) for how.
@@ -26,7 +26,13 @@ Prefer plain skill folders instead of plugins? Copy them straight in — into
 ```
 git clone https://github.com/wavebound-ai/wavebound-skills
 cp -r wavebound-skills/plugins/dev-skills/skills/* ~/.claude/skills/
+cp wavebound-skills/plugins/dev-skills/agents/* ~/.claude/agents/
 ```
+
+The second copy is for `/fable-review`: it spawns its reviewers as the `fable-reviewer`
+agent, and Claude Code reads agent definitions only from `~/.claude/agents/` or a
+repo's `.claude/agents/`. Agent definitions register when a session starts, so start a
+new session after copying.
 
 ## The skills
 
@@ -45,9 +51,26 @@ Adds **What happened** (the story) and **Where things stand** (done-and-verified
 done-but-unverified vs broken vs skipped, labeled honestly). Say "long tldr",
 "give me the full picture", or "catch me up properly".
 
+### /fable-review — the final pass before work ships
+
+A retrospective review of work just completed in the conversation, the pass a careful
+senior engineer runs before putting their name on it. It rebuilds the original request
+and acceptance criteria, sends fresh-eye adversarial subagents across distinct lenses
+(correctness, completeness, live data path, project rules, runtime surface, craft),
+verifies non-destructively with real tests, diffs, dry-runs and read-only queries, fixes
+only what it can prove locally, re-reviews substantial fixes, and reports with a fixed
+contract: verdict, what was checked, findings with evidence, requirement coverage,
+fixed, not fixed, disproved, not verified, one next step. Say "run Fable Review" or
+`/fable-review`. It never triggers on its own.
+
+Reviewers run as the bundled `fable-reviewer` agent (Opus at effort high, no
+file-editing tools), because the Agent tool has no effort setting and an unpinned
+subagent inherits the session's effort. The skill refuses to call a run a Fable Review
+when only cheap, fast, or default agents are available.
+
 ### Why they work
 
-Both are deliberately opinionated:
+The tldr pair is deliberately opinionated:
 
 - **No new work.** They summarize what's already in the conversation — no file
   reads, no re-verification, no tool calls. A TLDR that launches an investigation
